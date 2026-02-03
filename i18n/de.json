@@ -137,9 +137,9 @@
       "no": "Nein",
       "odometer": "Kilometerstand",
       "org": "Organisation",
-      "phaseCurrents": "Strom L1, L2, L3",
-      "phasePowers": "Leistung L1, L2, L3",
-      "phaseVoltages": "Spannung L1, L2, L3",
+      "phaseCurrents": "Strom",
+      "phasePowers": "Leistung",
+      "phaseVoltages": "Spannung",
       "phases1p3p": "Phasenumschaltung",
       "power": "Leistung",
       "powerRange": "Leistung",
@@ -172,7 +172,23 @@
       "loading": "Lade YAML-Editor …"
     },
     "eebus": {
-      "description": "Grundkonfiguration für die Kommunikation mit anderen EEBus-Geräten.",
+      "certificate": {
+        "private": "Privater Schlüssel",
+        "public": "Öffentliches Zertifikat",
+        "title": "Zertifikate"
+      },
+      "description": "Konfiguration zur Kommunikation mit EEBus-kompatiblen Geräten wie Wallboxen oder dem Steuergerät des Netzbetreibers. Alle notwendigen Initialisierungen und die Zertifikatsgenerierung erfolgen automatisch beim ersten Start.",
+      "descriptionAdvanced": "Keine Änderungen erforderlich. Bei Änderung ist Neukoppelung aller Geräte erforderlich.",
+      "interfaces": "Schnittstellen",
+      "interfacesHelp": "Begrenzt die Netzwerkschnittstellen, die EEBus nutzen soll, um Kommunikationsprobleme zu vermeiden. Feld leer lassen, um alle Schnittstellen zu verwenden. Ein Eintrag pro Zeile.",
+      "port": "Port",
+      "portHelp": "Der zu verwendende Port.",
+      "removeConfirm": "Die gesamte EEBus-Konfiguration wird entfernt. Neue Zertifikate und Kennungen werden beim nächsten Start generiert. Bist du sicher?",
+      "shipid": "SHIP-ID",
+      "shipidExplain": "Permanente Gerätekennung zur Identifikation im EEBus-Netzwerk.",
+      "shipidHelp": "Diese SHIP-ID ist mit den unten stehenden Zertifikaten verknüpft.",
+      "ski": "SKI",
+      "skiExplain": "Eindeutige Sicherheitskennung zum Koppeln von EEBus-Geräten.",
       "title": "EEBus"
     },
     "experimental": {
@@ -209,6 +225,7 @@
       "dragList": "Sortierbare Liste",
       "experimental": "Experimentell",
       "forceSave": "Trotzdem speichern",
+      "fromYamlHint": "Hinweis: Konfiguriert über evcc.yaml. Entferne den Eintrag aus der Datei, um die Bearbeitung hier zu aktivieren.",
       "hideAdvancedSettings": "Erweiterte Einstellungen ausblenden",
       "invalidFileSelected": "Ungültige Datei ausgewählt",
       "noFileSelected": "Keine Datei ausgewählt.",
@@ -243,12 +260,11 @@
         "limitpower": "Limit (kW)",
         "type": "Typ"
       },
-      "description": "Leistungsbegrenzung durch externe Systeme (bspw. Steuerboxen, § 14a EnWG). Setzt Lastmanagementkonfiguration voraus.",
+      "description": "Leistungsbegrenzung durch externe Systeme (z.B. §14a EnWG, §9 EEG Schnittstelle oder übergeordnetes Energiemanagementsystem). Spielt mit dem Lastmanagement Feature zusammen.",
       "downloadCsv": "CSV herunterladen",
       "eventsRecorded": "{count} Netzbegrenzungen gespeichert.",
       "lastEvent": "Zuletzt {timeAgo}.",
-      "title": "HEMS",
-      "yamlConfigured": "Hinweis: Konfiguriert über evcc.yaml. Entferne den Eintrag aus der Datei, um die Bearbeitung hier zu aktivieren."
+      "title": "Externe Begrenzung"
     },
     "icon": {
       "change": "ändern",
@@ -294,6 +310,7 @@
       "chargerTypeLabel": "Ladetyp",
       "chargingTitle": "Verhalten",
       "circuitHelp": "Lastmanagement-Zuordnung, um die Leistungs- und Stromgrenzen nicht zu überschreiten.",
+      "circuitInvalid": "Stromkreis existiert nicht",
       "circuitLabel": "Stromkreis",
       "circuitUnassigned": "nicht zugewiesen",
       "defaultModeHelp": {
@@ -370,6 +387,7 @@
       "vehicleAutoDetection": "automatische Erkennung",
       "vehicleHelpAutoDetection": "Wählt automatisch das plausibelste Fahrzeug aus. Manuelle Übersteuerung möglich.",
       "vehicleHelpDefault": "Nimmt immer an, dass dieses Fahrzeug hier lädt. Auto-Erkennung deaktiviert. Manuelle Übersteuerung möglich.",
+      "vehicleInvalid": "Fahrzeug existiert nicht",
       "vehicleLabel": "Standard-Fahrzeug",
       "vehiclesTitle": "Fahrzeuge"
     },
@@ -387,9 +405,8 @@
       "title": "Konfiguration",
       "unconfigured": "nicht konfiguriert",
       "vehicles": "Meine Fahrzeuge",
-      "welcomeBannerText": "Lege zunächst eine **Wallbox oder Heizung** an. Falls du noch keine echte Wallbox hast, wähle eine **Demowallbox**.",
-      "welcomeBannerTitle": "Los geht's mit der Konfiguration!",
-      "yaml": "Geräte aus evcc.yaml sind nicht editierbar."
+      "welcomeBannerText": "Lege zunächst eine **Wallbox**, **Heizung**, **Netzzähler**, **Solar**, **Batterie** oder **zusätzlichen Zähler** an. Falls du nur testen möchtest, wähle ein **Demogerät**.",
+      "welcomeBannerTitle": "Los geht's mit der Konfiguration!"
     },
     "messaging": {
       "description": "Benachrichtigungen über Ladevorgänge und andere Ereignisse erhalten.",
@@ -472,7 +489,7 @@
       "labelClientCert": "Clientzertifikat",
       "labelClientId": "Client ID",
       "labelClientKey": "Client-Key",
-      "labelInsecure": "Zertifikatüberprüfung",
+      "labelInsecure": "Zertifikatsüberprüfung",
       "labelPassword": "Passwort",
       "labelTopic": "Thema",
       "labelUser": "Benutzer",
@@ -541,6 +558,7 @@
       "integrations": "Integrationen",
       "loadpoints": "Laden & Heizen",
       "meter": "PV & Batterie",
+      "services": "Dienste",
       "system": "System",
       "vehicles": "Fahrzeuge"
     },
@@ -760,6 +778,9 @@
       "solar": "Solar"
     }
   },
+  "general": {
+    "note": "Hinweis:"
+  },
   "header": {
     "about": "Über",
     "blog": "Blog",
@@ -893,6 +914,7 @@
       "repeating": "wiederholend",
       "repeatingPlans": "Wiederholende Pläne",
       "selectAll": "Alle wählen",
+      "strategyDisabledDescription": "Das Laden startet so spät wie möglich und wird rechtzeitig zur Abfahrt abgeschlossen. Mit dynamischen Netzpreisen oder einem CO₂-Tarif stehen hier weitere Optionen zur Verfügung.",
       "strategySettings": "Strategie-Einstellungen",
       "time": "Zeit",
       "title": "Plan",

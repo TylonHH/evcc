@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -86,11 +87,17 @@ func (site *Site) optimizerUpdate(battery []measurement) error {
 		return nil
 	}
 
-	solar := currentRates(site.GetTariff(api.TariffUsageSolar))
+	solarTariff := site.GetTariff(api.TariffUsageSolar)
+	solar := currentRates(solarTariff)
+
 	grid := currentRates(site.GetTariff(api.TariffUsageGrid))
 	feedIn := currentRates(site.GetTariff(api.TariffUsageFeedIn))
 
-	minLen := lo.Min([]int{len(grid), len(feedIn), len(solar)})
+	minLen := lo.Min([]int{len(grid), len(feedIn)})
+	if solarTariff != nil {
+		// allow empty solar forecast
+		minLen = min(minLen, len(solar))
+	}
 	if minLen < 8 {
 		return fmt.Errorf("not enough slots for optimization: %d (grid=%d, feedIn=%d, solar=%d)", minLen, len(grid), len(feedIn), len(solar))
 	}
@@ -110,9 +117,15 @@ func (site *Site) optimizerUpdate(battery []measurement) error {
 		return err
 	}
 
-	solarEnergy, err := solarRatesToEnergy(solar)
-	if err != nil {
-		return err
+	// allow empty solar forecast
+	ft := lo.RepeatBy(minLen, func(i int) float32 { return float32(0) })
+	if solarTariff != nil {
+		solarEnergy, err := solarRatesToEnergy(solar)
+		if err != nil {
+			return err
+		}
+
+		ft = prorate(scaleAndPrune(solarEnergy, 1, minLen), firstSlotDuration)
 	}
 
 	req := evopt.OptimizationInput{
@@ -125,7 +138,7 @@ func (site *Site) optimizerUpdate(battery []measurement) error {
 		TimeSeries: evopt.TimeSeries{
 			Dt: dt,
 			Gt: prorate(gt, firstSlotDuration),
-			Ft: prorate(scaleAndPrune(solarEnergy, 1, minLen), firstSlotDuration),
+			Ft: ft,
 			PN: scaleAndPrune(grid, 1e3, minLen),
 			PE: scaleAndPrune(feedIn, 1e3, minLen),
 		},
@@ -289,16 +302,8 @@ func (site *Site) optimizerUpdate(battery []measurement) error {
 		return err
 	}
 
-	if resp.StatusCode() == http.StatusInternalServerError {
-		return errors.New(resp.JSON500.Message)
-	}
-
-	if resp.StatusCode() == http.StatusBadRequest {
-		return errors.New(resp.JSON400.Message)
-	}
-
 	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("invalid status: %d", resp.StatusCode())
+		return apiError(resp)
 	}
 
 	site.publish("evopt", struct {
@@ -547,4 +552,30 @@ func applySmartCostLimit(lp loadpoint.API, demand []float32, grid api.Rates, min
 	}
 
 	return demand
+}
+
+// apiError extracts error message from optimizer API response
+func apiError(resp *evopt.PostOptimizeChargeScheduleResponse) error {
+	var errObj *evopt.Error
+	switch resp.StatusCode() {
+	case http.StatusBadRequest:
+		errObj = resp.JSON400
+	case http.StatusInternalServerError:
+		errObj = resp.JSON500
+	}
+
+	if errObj == nil {
+		return fmt.Errorf("invalid status: %d", resp.StatusCode())
+	}
+
+	if len(errObj.Details) > 0 {
+		var details []string
+		for field, msg := range errObj.Details {
+			details = append(details, fmt.Sprintf("%s: %s", field, msg))
+		}
+		slices.Sort(details)
+		return fmt.Errorf("%s (%s)", errObj.Message, strings.Join(details, ", "))
+	}
+
+	return errors.New(errObj.Message)
 }

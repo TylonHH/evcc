@@ -100,7 +100,7 @@
     "control": {
       "description": "Les valeurs par défaut sont généralement bonnes. Ne faites des changements que si vous savez ce que vous faites.",
       "descriptionInterval": "Cycle de mise à jour en secondes. Définit la fréquence à laquelle evcc lit les données du compteur et ajuste la facturation. La valeur par défaut de 30 secondes est un choix sûr. Les appareils tels que les véhicules, les boîtiers muraux et les onduleurs ont généralement besoin de plusieurs secondes pour ajuster leur comportement. Si vos composants réagissent rapidement, vous pouvez utiliser des valeurs plus faibles. Nous vous recommandons vivement de ne pas descendre en dessous de 10 secondes. Si vous observez un comportement de contrôle erratique ou des valeurs de puissance instables, choisissez un intervalle plus long.",
-      "descriptionResidualPower": "Décale le point de fonctionnement de la boucle de contrôle. La valeur par défaut de 100 W donne une légère priorité aux batteries domestiques par rapport à l'utilisation du réseau. Si vous ne disposez pas de batterie, vous pouvez régler cette valeur sur 0 W afin de minimiser la consommation du réseau en mode solaire.",
+      "descriptionResidualPower": "Déplace le point de fonctionnement de la boucle de contrôle. Si vous disposez d'une batterie domestique, il est recommandé de définir une valeur de 100 W. De cette manière, la batterie aura une légère priorité sur l'utilisation du réseau.",
       "labelInterval": "Intervalle de mise à jour",
       "labelResidualPower": "Puissance résiduelle",
       "title": "Comportement du contrôle"
@@ -137,9 +137,9 @@
       "no": "non",
       "odometer": "Compteur kilométrique",
       "org": "Organisation",
-      "phaseCurrents": "Courant L1, L2, L3",
-      "phasePowers": "Puissance L1, L2, L3",
-      "phaseVoltages": "Voltage L1, L2, L3",
+      "phaseCurrents": "Courant",
+      "phasePowers": "Puissance",
+      "phaseVoltages": "Voltage",
       "phases1p3p": "Commutation de phase",
       "power": "Puissance",
       "powerRange": "Fourchette puissance",
@@ -209,6 +209,7 @@
       "dragList": "Liste à ordonner",
       "experimental": "Expérimental",
       "forceSave": "Enregistrer quand même",
+      "fromYamlHint": "Remarque : configuré via evcc.yaml. Supprimez l'entrée du fichier pour pouvoir effectuer des modifications ici.",
       "hideAdvancedSettings": "Masquer les paramètres avancés",
       "invalidFileSelected": "Fichier sélectionné non valide",
       "noFileSelected": "Aucun fichier sélectionné.",
@@ -243,12 +244,11 @@
         "limitpower": "Limite (kW)",
         "type": "Type"
       },
-      "description": "Limitation de la puissance par un système externe (par exemple contrôleur EnWG 14a). Nécessite de configurer la gestion de charge.",
+      "description": "Limitation de puissance par des systèmes externes (par exemple §14a EnWG, §9 EEG interface ou système de gestion de l'énergie de niveau supérieur). Fonctionne en association avec la fonction de gestion de la charge.",
       "downloadCsv": "Télécharger CSV",
       "eventsRecorded": "Enregistrement de {count} événements liés à la limitation de la grille.",
       "lastEvent": "Le plus récent {timeAgo}.",
-      "title": "SGED",
-      "yamlConfigured": "Remarque : configuré via evcc.yaml. Supprimez l'entrée du fichier pour pouvoir effectuer des modifications ici."
+      "title": "Limite externe"
     },
     "icon": {
       "change": "changer",
@@ -294,6 +294,7 @@
       "chargerTypeLabel": "Type de chargeur",
       "chargingTitle": "Comportement",
       "circuitHelp": "Assignation de la gestion de charge afin d’assurer que les limites de puissance et de courant ne sont pas dépassées.",
+      "circuitInvalid": "Le circuit n'existe pas",
       "circuitLabel": "Circuit",
       "circuitUnassigned": "non assigné",
       "defaultModeHelp": {
@@ -370,6 +371,7 @@
       "vehicleAutoDetection": "auto détection",
       "vehicleHelpAutoDetection": "Sélectionner automatiquement le véhicule le plus plausible. Un changement manuel reste possible.",
       "vehicleHelpDefault": "Toujours considérer que ce véhicule charge ici. Auto-détection désactivée. Un changement manuel reste possible.",
+      "vehicleInvalid": "Le véhicule n'existe pas",
       "vehicleLabel": "Véhicule par défaut",
       "vehiclesTitle": "Véhicules"
     },
@@ -387,9 +389,8 @@
       "title": "Configuration",
       "unconfigured": "non configuré",
       "vehicles": "Mes véhicules",
-      "welcomeBannerText": "Commencez par créer un **chargeur ou un chauffage**. Si vous ne disposez pas encore d'un véritable chargeur, choisissez un **chargeur de démonstration**.",
-      "welcomeBannerTitle": "Configurons votre système !",
-      "yaml": "Un appareil provenant du evcc.yaml n’est pas modifiable."
+      "welcomeBannerText": "Commencez par créer au moins un **chargeur**, un **chauffage**, un **réseau**, un **système solaire**, une **batterie** ou un **compteur supplémentaire**. Si vous souhaitez simplement tester, choisissez un **appareil de démonstration**.",
+      "welcomeBannerTitle": "Configurons votre système !"
     },
     "messaging": {
       "description": "Recevoir des messages à propos de vos sessions de charge.",
@@ -523,8 +524,8 @@
         "standby": "Standby"
       },
       "schema": {
-        "http": "HTTP (non crypté)",
-        "https": "HTTP (crypté)"
+        "http": "HTTP (non chiffré)",
+        "https": "HTTPS (chiffré)"
       },
       "status": {
         "A": "A (non connecté)",
@@ -762,6 +763,9 @@
       "solar": "Solaire"
     }
   },
+  "general": {
+    "note": "Remarque :"
+  },
   "header": {
     "about": "À propos",
     "authProviders": {
@@ -887,6 +891,11 @@
       "goal": "Objectif de recharge",
       "modalTitle": "Planification de la charge",
       "none": "aucune",
+      "optimization": {
+        "cheapest": "le moins cher",
+        "continuous": "continu",
+        "label": "Optimisation"
+      },
       "planNumber": "Planning {number}",
       "precondition": {
         "description": "Charge {duration} avant le départ pour pré-conditionner la batterie.",
@@ -898,6 +907,8 @@
       "repeating": "récurrent",
       "repeatingPlans": "Plannings récurrents",
       "selectAll": "Sélect. tous",
+      "strategyDisabledDescription": "La recharge commence le plus tard possible afin de se terminer juste à temps pour le départ. Avec les prix dynamiques du réseau ou la tarification CO₂, davantage d'options sont disponibles ici.",
+      "strategySettings": "Paramètres stratégiques",
       "time": "Heure",
       "title": "Planification",
       "titleMinSoc": "Charge min",

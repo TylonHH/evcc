@@ -20,8 +20,8 @@
 					@site-changed="siteChanged"
 				/>
 
+				<WelcomeBanner v-if="setupRequired" />
 				<h2 class="my-4">{{ $t("config.section.loadpoints") }}</h2>
-				<WelcomeBanner v-if="loadpointsRequired" class="my-4" />
 				<div class="p-0 config-list">
 					<DeviceCard
 						v-for="loadpoint in loadpoints"
@@ -48,7 +48,6 @@
 					<NewDeviceButton
 						data-testid="add-loadpoint"
 						:title="$t('config.main.addLoadpoint')"
-						:attention="loadpointsRequired"
 						@click="newLoadpoint"
 					/>
 				</div>
@@ -212,33 +211,6 @@
 						</template>
 					</DeviceCard>
 					<DeviceCard
-						:title="$t('config.eebus.title')"
-						editable
-						:error="hasClassError('eebus')"
-						:unconfigured="isUnconfigured(eebusTags)"
-						data-testid="eebus"
-						@edit="openModal('eebusModal')"
-					>
-						<template #icon><EebusIcon /></template>
-						<template #tags>
-							<DeviceTags :tags="eebusTags" />
-						</template>
-					</DeviceCard>
-					<DeviceCard
-						:title="$t('config.ocpp.title')"
-						editable
-						:error="hasClassError('ocpp')"
-						:unconfigured="isUnconfigured(ocppTags)"
-						data-testid="ocpp"
-						@edit="openModal('ocppModal')"
-					>
-						<template #icon><OcppIcon /></template>
-						<template #tags>
-							<DeviceTags :tags="ocppTags" />
-						</template>
-					</DeviceCard>
-
-					<DeviceCard
 						:title="`${$t('config.circuits.title')}`"
 						editable
 						:error="hasClassError('circuit')"
@@ -280,19 +252,6 @@
 						</template>
 					</DeviceCard>
 					<DeviceCard
-						:title="$t('config.shm.cardTitle')"
-						editable
-						:error="hasClassError('shm')"
-						:unconfigured="isUnconfigured(shmTags)"
-						data-testid="shm"
-						@edit="openModal('shmModal')"
-					>
-						<template #icon><ShmIcon /></template>
-						<template #tags>
-							<DeviceTags :tags="shmTags" />
-						</template>
-					</DeviceCard>
-					<DeviceCard
 						:title="$t('config.hems.title')"
 						editable
 						:error="hasClassError('hems')"
@@ -304,6 +263,37 @@
 						<template #tags>
 							<DeviceTags :tags="hemsTags" />
 						</template>
+					</DeviceCard>
+				</div>
+
+				<h2 class="my-4 mt-5">{{ $t("config.section.services") }}</h2>
+				<div class="p-0 config-list">
+					<DeviceCard
+						:title="$t('config.ocpp.title')"
+						editable
+						:error="hasClassError('ocpp')"
+						data-testid="ocpp"
+						@edit="openModal('ocppModal')"
+					>
+						<template #icon><OcppIcon /></template>
+					</DeviceCard>
+					<DeviceCard
+						:title="$t('config.shm.cardTitle')"
+						editable
+						:error="hasClassError('shm')"
+						data-testid="shm"
+						@edit="openModal('shmModal')"
+					>
+						<template #icon><ShmIcon /></template>
+					</DeviceCard>
+					<DeviceCard
+						:title="$t('config.eebus.title')"
+						editable
+						:error="hasClassError('eebus')"
+						data-testid="eebus"
+						@edit="openModal('eebusModal')"
+					>
+						<template #icon><EebusIcon /></template>
 					</DeviceCard>
 				</div>
 
@@ -388,7 +378,11 @@
 					:extMeters="extMeters"
 					@changed="yamlChanged"
 				/>
-				<EebusModal @changed="yamlChanged" />
+				<EebusModal
+					:status="eebus?.status"
+					:from-yaml="eebus?.fromYaml"
+					@changed="yamlChanged"
+				/>
 				<OcppModal :ocpp="ocpp" />
 				<BackupRestoreModal v-bind="backupRestoreProps" />
 				<PasswordModal update-mode />
@@ -455,6 +449,7 @@ import type {
 	ConfigMeter,
 	LoadpointType,
 	Timeout,
+	VehicleOption,
 	MeterType,
 	SiteConfig,
 	DeviceType,
@@ -571,8 +566,8 @@ export default defineComponent({
 		authProviders() {
 			return store.state?.authProviders;
 		},
-		loadpointsRequired() {
-			return this.loadpoints.length === 0;
+		setupRequired() {
+			return store.state?.setupRequired;
 		},
 		siteTitle() {
 			return this.site?.title;
@@ -653,14 +648,8 @@ export default defineComponent({
 			if (org) result.org = { value: org };
 			return result;
 		},
-		vehicleOptions() {
+		vehicleOptions(): VehicleOption[] {
 			return this.vehicles.map((v) => ({ key: v.name, name: v.config?.title || v.name }));
-		},
-		shmTags(): DeviceTags {
-			const { vendorId, deviceId } = store.state?.shm || {};
-			// TODO: use incoming SEMP connections to determin configured/active status
-			const value = !!vendorId || !!deviceId;
-			return { configured: { value } };
 		},
 		hems() {
 			return store.state?.hems;
@@ -698,30 +687,8 @@ export default defineComponent({
 			// @ts-expect-error: telemetry property exists but not in TypeScript definitions
 			return store.state?.telemetry === true;
 		},
-		eebusTags(): DeviceTags {
-			return { configured: { value: store.state?.eebus || false } };
-		},
-		ocppTags(): DeviceTags {
-			const ocpp = store.state?.ocpp;
-			const stations = ocpp?.status?.stations || [];
-			if (stations.length === 0) {
-				return { configured: { value: false } };
-			}
-
-			const connected = stations.filter((s) => s.status === "connected").length;
-			const configured = stations.filter((s) => s.status === "configured").length;
-			const detected = stations.filter((s) => s.status === "unknown").length;
-			const total = connected + configured;
-
-			const tags: Record<string, any> = {
-				connections: { value: `${connected}/${total}` },
-			};
-
-			if (detected > 0) {
-				tags["detected"] = { value: detected };
-			}
-
-			return tags;
+		eebus() {
+			return store.state?.eebus;
 		},
 		modbusproxyTags(): DeviceTags {
 			const config = store.state?.modbusproxy || [];
@@ -788,26 +755,27 @@ export default defineComponent({
 			this.updateValues();
 		},
 		async loadDirty() {
-			const response = await api.get("/config/dirty");
-			if (response.data) {
+			const data = await this.loadConfig("dirty");
+			if (data) {
 				restart.restartNeeded = true;
 			}
 		},
+		async loadConfig(path: string) {
+			const validateStatus = (code: number) => [200, 404].includes(code);
+			const response = await api.get(`/config/${path}`, { validateStatus });
+			return response.status === 200 ? response.data : undefined;
+		},
 		async loadVehicles() {
-			const response = await api.get("/config/devices/vehicle");
-			this.vehicles = response.data || [];
+			this.vehicles = (await this.loadConfig("devices/vehicle")) || [];
 		},
 		async loadChargers() {
-			const response = await api.get("/config/devices/charger");
-			this.chargers = response.data || [];
+			this.chargers = (await this.loadConfig("devices/charger")) || [];
 		},
 		async loadMeters() {
-			const response = await api.get("/config/devices/meter");
-			this.meters = response.data || [];
+			this.meters = (await this.loadConfig("devices/meter")) || [];
 		},
 		async loadCircuits() {
-			const response = await api.get("/config/devices/circuit");
-			const circuits = response.data || [];
+			const circuits = (await this.loadConfig("devices/circuit")) || [];
 			// set lpc default title
 			circuits.forEach((c: ConfigCircuit) => {
 				if (c.name === "lpc" && !c.config?.title) {
@@ -818,16 +786,13 @@ export default defineComponent({
 			this.circuits = circuits;
 		},
 		async loadSite() {
-			const response = await api.get("/config/site", {
-				validateStatus: (status: number) => status < 500,
-			});
-			if (response.status === 200) {
-				this.site = response.data;
+			const data = await this.loadConfig("site");
+			if (data) {
+				this.site = data;
 			}
 		},
 		async loadLoadpoints() {
-			const response = await api.get("/config/loadpoints");
-			this.loadpoints = response.data || [];
+			this.loadpoints = (await this.loadConfig("loadpoints")) || [];
 		},
 		getMetersByNames(names: string[] | null): ConfigMeter[] {
 			if (!names || !this.meters) {
@@ -1047,9 +1012,14 @@ export default defineComponent({
 		},
 		async updateDeviceValue(type: DeviceType, name: string) {
 			try {
-				const response = await api.get(`/config/devices/${type}/${name}/status`);
-				if (!this.deviceValues[type]) this.deviceValues[type] = {};
-				this.deviceValues[type][name] = response.data;
+				const validateStatus = (status: number) => [200, 404].includes(status);
+				const response = await api.get(`/config/devices/${type}/${name}/status`, {
+					validateStatus,
+				});
+				if (response.status === 200) {
+					if (!this.deviceValues[type]) this.deviceValues[type] = {};
+					this.deviceValues[type][name] = response.data;
+				}
 			} catch (error) {
 				console.error("Error fetching device values for", type, name, error);
 			}

@@ -137,9 +137,9 @@
       "no": "no",
       "odometer": "Odometer",
       "org": "Organization",
-      "phaseCurrents": "Current L1, L2, L3",
-      "phasePowers": "Power L1, L2, L3",
-      "phaseVoltages": "Voltage L1, L2, L3",
+      "phaseCurrents": "Current",
+      "phasePowers": "Power",
+      "phaseVoltages": "Voltage",
       "phases1p3p": "Phase switch",
       "power": "Power",
       "powerRange": "Power",
@@ -172,7 +172,23 @@
       "loading": "Loading YAML editor…"
     },
     "eebus": {
-      "description": "Configuration that enables evcc to communicate with other EEBus devices.",
+      "certificate": {
+        "private": "Private key",
+        "public": "Public certificate",
+        "title": "Certificates"
+      },
+      "description": "Configuration that enables evcc to communicate with EEBus compatible devices like chargers or a control unit of your grid operator. All relevant initialization and certificate generation is done automatically on first start.",
+      "descriptionAdvanced": "No changes required. Only perform changes if you really know what you're doing. If you change either the SHIP-id or the certificates, you'll need to pair your devices again.",
+      "interfaces": "Interfaces",
+      "interfacesHelp": "Limit the network interfaces that EEBus should use to avoid communication problems. Leave the field blank to use all interfaces. One entry per line.",
+      "port": "Port",
+      "portHelp": "The port to be used.",
+      "removeConfirm": "All EEBus configuration will be removed. New certificates and identifiers will be generated on next start. Are you sure?",
+      "shipid": "SHIP-ID",
+      "shipidExplain": "Permanent device identifier for identification in the EEBus network.",
+      "shipidHelp": "This SHIP-ID is linked to the certificates below.",
+      "ski": "SKI",
+      "skiExplain": "Unique security identifier for pairing EEBus devices.",
       "title": "EEBus"
     },
     "experimental": {
@@ -209,6 +225,7 @@
       "dragList": "Reorderable list",
       "experimental": "Experimental",
       "forceSave": "Save anyway",
+      "fromYamlHint": "Note: Configured via evcc.yaml. Remove the entry from the file to enable editing here.",
       "hideAdvancedSettings": "Hide advanced settings",
       "invalidFileSelected": "Invalid file selected",
       "noFileSelected": "No file selected.",
@@ -243,12 +260,11 @@
         "limitpower": "Limit (kW)",
         "type": "Type"
       },
-      "description": "Power limitation by external systems (e.g. EnWG 14a controllers). Requires load management configuration.",
+      "description": "Power limitation by external systems (e.g. §14a EnWG, §9 EEG interface or higher-level energy management system). Works together with the load management feature.",
       "downloadCsv": "Download CSV",
       "eventsRecorded": "Recorded {count} grid limitation events.",
       "lastEvent": "Most recent {timeAgo}.",
-      "title": "HEMS",
-      "yamlConfigured": "Note: Configured via evcc.yaml. Remove the entry from the file to enable editing here."
+      "title": "External Limit"
     },
     "icon": {
       "change": "change",
@@ -294,6 +310,7 @@
       "chargerTypeLabel": "Charger type",
       "chargingTitle": "Behaviour",
       "circuitHelp": "Load management assignment to ensure power and current limits are not exceeded.",
+      "circuitInvalid": "Circuit does not exist",
       "circuitLabel": "Circuit",
       "circuitUnassigned": "unassigned",
       "defaultModeHelp": {
@@ -370,6 +387,7 @@
       "vehicleAutoDetection": "auto detection",
       "vehicleHelpAutoDetection": "Automatically selects the most plausible vehicle. Manual override is possible.",
       "vehicleHelpDefault": "Always assume this vehicle is charging here. Auto-detection disabled. Manual override is possible.",
+      "vehicleInvalid": "Vehicle does not exist",
       "vehicleLabel": "Default vehicle",
       "vehiclesTitle": "Vehicles"
     },
@@ -387,9 +405,8 @@
       "title": "Configuration",
       "unconfigured": "not configured",
       "vehicles": "My Vehicles",
-      "welcomeBannerText": "Start with creating a **charger or heater**. If you don't have a real charger yet, choose a **demo charger**.",
-      "welcomeBannerTitle": "Let's configure your system!",
-      "yaml": "Devices from evcc.yaml are not editable."
+      "welcomeBannerText": "Start with creating at least one **charger**, **heater**, **grid**, **solar**, **battery** or **additional meter**. If you just want to test, pick a **demo device**.",
+      "welcomeBannerTitle": "Let's configure your system!"
     },
     "messaging": {
       "description": "Receive messages about your charging sessions.",
@@ -541,6 +558,7 @@
       "integrations": "Integrations",
       "loadpoints": "Charging & Heating",
       "meter": "Solar & Battery",
+      "services": "Services",
       "system": "System",
       "vehicles": "Vehicles"
     },
@@ -760,6 +778,9 @@
       "solar": "Solar"
     }
   },
+  "general": {
+    "note": "Note:"
+  },
   "header": {
     "about": "About",
     "blog": "Blog",
@@ -893,6 +914,7 @@
       "repeating": "repeating",
       "repeatingPlans": "Repeating plans",
       "selectAll": "Select all",
+      "strategyDisabledDescription": "Charging starts as late as possible to finish just in time for departure. With dynamic grid prices or CO₂ tariff, more options are available here.",
       "strategySettings": "Strategy settings",
       "time": "Time",
       "title": "Plan",

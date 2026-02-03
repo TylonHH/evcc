@@ -44,7 +44,6 @@
 				<span v-else-if="alreadyReached">{{ $t("main.targetCharge.goalReached") }}</span>
 				<span v-else>{{ nextPlanTitle }}</span>
 				<button
-					v-if="showStrategy"
 					type="button"
 					class="btn btn-sm"
 					:class="strategyOpen ? 'btn-secondary' : 'evcc-gray'"
@@ -57,8 +56,10 @@
 			</div>
 		</h5>
 		<ChargingPlanStrategy
-			v-if="showStrategy"
-			v-bind="chargingPlanStrategyProps"
+			:id="id"
+			:precondition="effectivePlanStrategy?.precondition"
+			:continuous="effectivePlanStrategy?.continuous"
+			:disabled="strategyDisabled"
 			:show="strategyOpen"
 			@update="updatePlanStrategy"
 		/>
@@ -108,8 +109,7 @@ export default defineComponent({
 		effectiveLimitSoc: Number,
 		effectivePlanTime: String,
 		effectivePlanSoc: Number,
-		effectivePlanPrecondition: Number,
-		effectivePlanContinuous: Boolean,
+		effectivePlanStrategy: Object as PropType<PlanStrategy>,
 		planEnergy: Number,
 		limitEnergy: Number,
 		socBasedPlanning: Boolean,
@@ -160,24 +160,18 @@ export default defineComponent({
 				? { duration, plan, power, rates, targetTime, currency, smartCostType }
 				: null;
 		},
-		chargingPlanStrategyProps(): any {
-			return {
-				id: this.id,
-				precondition: this.effectivePlanPrecondition,
-				continuous: this.effectivePlanContinuous,
-			};
-		},
 		alreadyReached(): boolean {
 			return this.plan.duration === 0;
 		},
 		nextPlanTitle(): string {
 			return `${this.$t("main.targetCharge.nextPlan")} #${this.nextPlanId}`;
 		},
-		showStrategy(): boolean {
-			// only show option if planner forecast has different values
+		strategyDisabled(): boolean {
+			// options only make sense if there are variable prices
+			// TODO: make this logic more robust (api fails, missing data)
 			const slots = this.forecast?.planner || [];
 			const values = new Set(slots.map(({ value }) => value));
-			return values.size > 1;
+			return values.size <= 1;
 		},
 	},
 	watch: {
@@ -186,11 +180,11 @@ export default defineComponent({
 				this.updatePlanDebounced();
 			}
 		},
-		effectivePlanPrecondition() {
-			this.updatePlanDebounced();
-		},
-		effectivePlanContinuous() {
-			this.updatePlanDebounced();
+		effectivePlanStrategy: {
+			deep: true,
+			handler() {
+				this.updatePlanDebounced();
+			},
 		},
 		staticPlan: {
 			deep: true,
