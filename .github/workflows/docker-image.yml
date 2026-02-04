@@ -30,6 +30,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute lowercase owner for GHCR tag
+        run: |
+          OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f1)
+          OWNER_LOWER=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          echo "OWNER_LOWER=$OWNER_LOWER" >> $GITHUB_ENV
+
       - name: Build and push image
         uses: docker/build-push-action@v4
         with:
@@ -38,7 +44,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ toLower(github.repository_owner) }}/evcc:latest
-            ghcr.io/${{ toLower(github.repository_owner) }}/evcc:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LOWER }}/evcc:latest
+            ghcr.io/${{ env.OWNER_LOWER }}/evcc:${{ github.sha }}
           build-args: |
             RELEASE=1
