@@ -57,10 +57,13 @@
 				</div>
 			</div>
 			<div class="text-end">
-				<div class="label d-flex align-items-center justify-content-end gap-2">
+				<div class="label d-flex flex-wrap align-items-center justify-content-end gap-2">
 					<span v-if="activeSlot">{{ activeSlotName }}</span>
 					<span v-else>{{ currentPriceLabel }}</span>
-					<div v-if="!isCo2" class="price-scale-toggle d-flex align-items-center gap-1">
+					<div
+						v-if="!isCo2"
+						class="price-scale-toggle d-flex align-items-center gap-1 text-nowrap"
+					>
 						<span class="toggle-label">{{
 							$t("main.targetChargePlan.priceScaleZeroMax")
 						}}</span>
