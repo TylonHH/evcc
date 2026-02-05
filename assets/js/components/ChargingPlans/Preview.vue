@@ -1,6 +1,6 @@
 <template>
 	<div class="plan">
-		<div class="justify-content-between mb-2 d-flex justify-content-between">
+		<div class="justify-content-between mb-2 d-flex justify-content-between align-items-start">
 			<div class="text-start">
 				<div class="label">{{ $t("main.targetChargePlan.chargeDuration") }}</div>
 				<div
@@ -14,28 +14,27 @@
 					</div>
 				</div>
 			</div>
+			<div
+				v-if="hasTariff && !isCo2"
+				class="price-scale-center d-flex align-items-center gap-1 text-nowrap"
+			>
+				<span class="toggle-label">{{ $t("main.targetChargePlan.priceScaleZeroMax") }}</span>
+				<div class="form-check form-switch m-0">
+					<input
+						v-model="priceScaleMinMax"
+						class="form-check-input"
+						type="checkbox"
+						role="switch"
+						:aria-label="$t('main.targetChargePlan.priceScaleToggle')"
+					/>
+				</div>
+				<span class="toggle-label">{{ $t("main.targetChargePlan.priceScaleMinMax") }}</span>
+			</div>
 			<div v-if="hasTariff" class="text-end" data-testid="tariff-value">
 				<div class="label d-flex align-items-center justify-content-end gap-2">
 					<span v-if="activeSlot">{{ activeSlotName }}</span>
 					<span v-else-if="isCo2">{{ $t("main.targetChargePlan.co2Label") }}</span>
 					<span v-else>{{ $t("main.targetChargePlan.priceLabel") }}</span>
-					<div v-if="!isCo2" class="price-scale-toggle d-flex align-items-center gap-1">
-						<span class="toggle-label">{{
-							$t("main.targetChargePlan.priceScaleZeroMax")
-						}}</span>
-						<div class="form-check form-switch m-0">
-							<input
-								v-model="priceScaleMinMax"
-								class="form-check-input"
-								type="checkbox"
-								role="switch"
-								:aria-label="$t('main.targetChargePlan.priceScaleToggle')"
-							/>
-						</div>
-						<span class="toggle-label">{{
-							$t("main.targetChargePlan.priceScaleMinMax")
-						}}</span>
-					</div>
 				</div>
 				<div class="value text-primary">
 					{{ fmtAvgValue }}
@@ -248,10 +247,14 @@ export default defineComponent({
 	color: var(--evcc-gray);
 	text-transform: uppercase;
 }
-.price-scale-toggle {
+.price-scale-toggle,
+.price-scale-center {
 	text-transform: none;
 	font-size: 12px;
 	color: var(--evcc-gray);
+}
+.price-scale-center {
+	flex: 0 0 auto;
 }
 .toggle-label {
 	line-height: 1;
