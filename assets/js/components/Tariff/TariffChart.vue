@@ -73,6 +73,7 @@ export default defineComponent({
 		slots: { type: Array as PropType<Slot[]>, default: () => [] },
 		targetText: [String, null],
 		targetOffset: { type: Number, default: 0 },
+		minMaxScale: { type: Boolean, default: false },
 	},
 	emits: ["slot-hovered", "slot-selected"],
 	data() {
@@ -85,15 +86,16 @@ export default defineComponent({
 	},
 	computed: {
 		valueInfo() {
-			let max = Number.MIN_VALUE;
-			let min = 0;
-			this.slots
+			const values = this.slots
 				.map((s) => s.value)
-				.filter((value) => value !== undefined)
-				.forEach((value) => {
-					max = Math.max(max, value);
-					min = Math.min(min, value);
-				});
+				.filter((value) => value !== undefined) as number[];
+
+			if (values.length === 0) {
+				return { min: 0, range: 0 };
+			}
+
+			const max = Math.max(...values);
+			const min = this.minMaxScale ? Math.min(...values) : 0;
 			return { min, range: max - min };
 		},
 		targetLeft() {
@@ -148,9 +150,10 @@ export default defineComponent({
 		},
 		valueStyle(value: number | undefined) {
 			const val = value === undefined ? this.avgValue : value;
+			const { range, min } = this.valueInfo;
 			const height =
-				value !== undefined && !isNaN(val)
-					? `${10 + (90 / this.valueInfo.range) * (val - this.valueInfo.min)}%`
+				value !== undefined && !isNaN(val) && range > 0
+					? `${10 + (90 / range) * (val - min)}%`
 					: "50%";
 			return { height };
 		},

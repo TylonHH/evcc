@@ -1054,6 +1054,9 @@
       "chargeDuration": "Ladedauer",
       "co2Label": "CO₂-Emission ⌀",
       "priceLabel": "Energiepreis",
+      "priceScaleMinMax": "min–max",
+      "priceScaleToggle": "Preisskala",
+      "priceScaleZeroMax": "0–max",
       "timeRange": "{day} {range} Uhr",
       "unknownPrice": "noch unbekannt"
     },

@@ -15,10 +15,27 @@
 				</div>
 			</div>
 			<div v-if="hasTariff" class="text-end" data-testid="tariff-value">
-				<div class="label">
+				<div class="label d-flex align-items-center justify-content-end gap-2">
 					<span v-if="activeSlot">{{ activeSlotName }}</span>
 					<span v-else-if="isCo2">{{ $t("main.targetChargePlan.co2Label") }}</span>
 					<span v-else>{{ $t("main.targetChargePlan.priceLabel") }}</span>
+					<div v-if="!isCo2" class="price-scale-toggle d-flex align-items-center gap-1">
+						<span class="toggle-label">{{
+							$t("main.targetChargePlan.priceScaleZeroMax")
+						}}</span>
+						<div class="form-check form-switch m-0">
+							<input
+								v-model="priceScaleMinMax"
+								class="form-check-input"
+								type="checkbox"
+								role="switch"
+								:aria-label="$t('main.targetChargePlan.priceScaleToggle')"
+							/>
+						</div>
+						<span class="toggle-label">{{
+							$t("main.targetChargePlan.priceScaleMinMax")
+						}}</span>
+					</div>
 				</div>
 				<div class="value text-primary">
 					{{ fmtAvgValue }}
@@ -30,6 +47,7 @@
 			:slots="slots"
 			:target-text="targetText"
 			:target-offset="targetOffset"
+			:min-max-scale="priceScaleMinMax"
 			@slot-hovered="slotHovered"
 		/>
 	</div>
@@ -41,6 +59,7 @@ import formatter from "@/mixins/formatter";
 import minuteTicker from "@/mixins/minuteTicker";
 import TariffChart from "../Tariff/TariffChart.vue";
 import { SMART_COST_TYPE, type CURRENCY, type Rate, type Slot } from "@/types/evcc";
+import settings from "@/settings";
 
 export default defineComponent({
 	name: "ChargingPlanPreview",
@@ -113,6 +132,14 @@ export default defineComponent({
 			return this.isCo2
 				? this.fmtCo2Medium(value)
 				: this.fmtPricePerKWh(value, this.currency);
+		},
+		priceScaleMinMax: {
+			get(): boolean {
+				return settings.tariffChartMinMax;
+			},
+			set(value: boolean) {
+				settings.tariffChartMinMax = value;
+			},
 		},
 		activeSlot(): Slot | null {
 			return this.activeIndex !== null ? (this.slots[this.activeIndex] ?? null) : null;
@@ -220,5 +247,13 @@ export default defineComponent({
 .label {
 	color: var(--evcc-gray);
 	text-transform: uppercase;
+}
+.price-scale-toggle {
+	text-transform: none;
+	font-size: 12px;
+	color: var(--evcc-gray);
+}
+.toggle-label {
+	line-height: 1;
 }
 </style>
